@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: poc-asr-aks
+  labels:
+    run: poc-asr-aks
+spec:
+  type: LoadBalancer
+  selector:
+    run: poc-asr-aks
+  ports:
+  - name: https
+    port: 5001
+    targetPort: 5001
+    protocol: TCP
+  - name: http
+    port: 5000
+    targetPort: 5000
+    protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poc-asr-aks
+spec:
+  selector:
+    matchLabels:
+      run: poc-asr-aks
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        run: poc-asr-aks
+    spec:
+        containers:
+        - name: poc-asr-aks
+          image: poc-asr-aks:1.0.0
+          command:
+            - './MyHub'
+          ports:
+            - containerPort: 5000
+            - containerPort: 5001
+          resources:
+            limits:
+              memory: 200Mi
+              cpu: 200m

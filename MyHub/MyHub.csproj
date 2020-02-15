@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>poc-asr-aks</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Signalr" Version="1.*" />
+
+    <None Include="$(AppData)\microsoft\UserSecrets\$(UserSecretsId)\secrets.json" Link="secrets.json" />
+  </ItemGroup>
+
+</Project>
