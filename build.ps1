@@ -1,18 +1,27 @@
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
+    [switch] $Azure,
+
+    [Parameter()]
+    [switch] $NoBuild,
+
+    [Parameter()]
     [String] $ACR_NAME,
 
-    [Parameter(Mandatory = $true)]
+    [Parameter()]
     [String] $AKS_NAME,
 
-    [Parameter(Mandatory = $true)]
-    [String] $IMAGE_NAME = "AsrAks",
+    [Parameter()]
+    [String] $IMAGE_NAME = "poc-asr-aks",
 
-    [Parameter(Mandatory = $false)]
+    [Parameter()]
     [String] $IMAGE_VERSION = "latest",
 
+    [Parameter()]
     [String] $ACR_RESOURCE_GROUP,
+
+    [Parameter()]
     [String] $AKS_RESOURCE_GROUP
 )
 
@@ -28,7 +37,23 @@ $IMAGE_FULLTAG = "$($IMAGE_NAME):$($IMAGE_VERSION)"
 # az role assignment create --assignee $AKS_SP_ID --scope $ACR_RESOURCE_ID --role contributor
 
 # Build the image using ACR, and push it at the same time
-az acr build --registry $ACR_NAME --image $IMAGE_FULLTAG .
+if($Azure)
+{
+    if (-not $NoBuild)
+    {
+        az acr build --registry $ACR_NAME --image $IMAGE_FULLTAG .
+    }
+    
+    kubectl config use-context $AKS_NAME
+    kubectl apply -f ./kube/AsrAks.yaml
+}
+else
+{
+    if (-not $NoBuild)
+    {
+        docker build -t $IMAGE_FULLTAG .
+    }
 
-kubectl config use-context $AKS_NAME
-kubectl apply -f ./kube/AsrAks.yaml
+    kubectl config use-context docker-desktop
+    kubectl apply -f ./kube/AsrAks.yaml
+}
